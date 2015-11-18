@@ -46,9 +46,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private Sensor acclerometer;
     private boolean firstrun = true;
     private float defualtStateX;
-    private float defaultStateZ;
-    private final float tolarence = 2f;
-    private final float toleranceZ = 0.5f;
+    private final float tolarenceX = 1.3f;
+
+    float[] gravity = {0, 0, 0};
+    float[] linear_acceleration = new float[3];
 
     Vibrator vibrator;
 
@@ -159,40 +160,20 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     public void onSensorChanged(SensorEvent event) {
         if (firstrun) {
             defualtStateX = event.values[0];
-            defaultStateZ = event.values[2];
             firstrun = false;
         }
         else {
             float x = event.values[0];
-            float z = event.values[2];
 
-            boolean xChanged = (x > (defualtStateX + tolarence) || x < (defualtStateX - tolarence)) ? true : false;
-            if (xChanged) {
-                if (z > (defaultStateZ + toleranceZ)) {
-                    planeSprite.moveUp();
-                }
-                else if (z < (defaultStateZ - toleranceZ)) {
+            if (x > (defualtStateX + tolarenceX)) {
                     planeSprite.moveDown();
-                }
-                else {
-                    planeSprite.setySpeed(0);
-                }
+            }
+            else if(x < (defualtStateX - tolarenceX)) {
+                    planeSprite.moveUp();
             }
             else {
-                planeSprite.setySpeed(0);
+                    planeSprite.setySpeed(0);
             }
-
-
-//            if (x > (defualtStateX + tolarence)) {
-//                    planeSprite.moveDown();
-//            }
-//            else if(x < (defualtStateX - tolarence)) {
-//                    planeSprite.moveUp();
-//            }
-//            else {
-//                    planeSprite.setySpeed(0);
-//            }
-            Log.d("Accelerometer", "VALUE X = " + x + " VALUE Z = " + z);
         }
     }
 
