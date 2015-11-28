@@ -12,7 +12,7 @@ import com.tamz2.pan0068.cloudytrip2d.views.GameView;
  */
 public class Cloud extends GameObject {
 
-    private static final int DEFAULT_SPEED = -8;
+    public static final int DEFAULT_SPEED = -8;
 
     private boolean active = true;
 

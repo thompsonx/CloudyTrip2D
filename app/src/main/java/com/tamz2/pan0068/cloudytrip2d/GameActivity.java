@@ -1,6 +1,7 @@
 package com.tamz2.pan0068.cloudytrip2d;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -10,10 +11,11 @@ import android.view.WindowManager;
 
 import com.tamz2.pan0068.cloudytrip2d.views.GameView;
 
-public class GameActivity extends Activity {
+public class GameActivity extends Activity implements IEndGameListener{
 
     private GameView playground;
     private boolean paused = false;
+    private Bundle results;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +48,15 @@ public class GameActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+        this.playground.resume();
+        super.onResume();
+    }
 
+    @Override
+    protected void onPause() {
+        this.playground.pause();
+        super.onPause();
     }
 
     @Override
@@ -59,5 +67,19 @@ public class GameActivity extends Activity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         return this.playground.keyEventUp(keyCode);
+    }
+
+    @Override
+    public void onGameEnd(Bundle data) {
+        this.results = data;
+        finish();
+    }
+
+    @Override
+    public void finish() {
+        Intent data = new Intent();
+        data.putExtras(this.results);
+        setResult(RESULT_OK, data);
+        super.finish();
     }
 }

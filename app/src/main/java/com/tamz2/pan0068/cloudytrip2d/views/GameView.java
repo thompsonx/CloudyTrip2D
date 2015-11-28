@@ -9,12 +9,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.tamz2.pan0068.cloudytrip2d.IEndGameListener;
 import com.tamz2.pan0068.cloudytrip2d.R;
 import com.tamz2.pan0068.cloudytrip2d.objects.Cloud;
 import com.tamz2.pan0068.cloudytrip2d.objects.GameObject;
@@ -34,10 +36,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private SurfaceHolder holder;
     private Context context;
     private GameThread thread;
+    private boolean initThread = false;
 
     private Plane planeSprite;
     private Bitmap cloudBitmap;
     private List<GameObject> obstacles;
+
+    private int lives = 3;
+    private int score = 0;
+    private final int cloudSpawnTime = 2500;
+    private final int spawnDecrease = 500;
+    private final int decreaseTime = 15000;
+    private final int maxSpeed = Cloud.DEFAULT_SPEED * 3;
 
     private long speedResetTime = Long.MAX_VALUE;
     private boolean speedReseted = false;
@@ -48,18 +58,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private float defualtStateX;
     private final float tolarenceX = 1.3f;
 
-    float[] gravity = {0, 0, 0};
-    float[] linear_acceleration = new float[3];
+    private IEndGameListener listener;
 
     Vibrator vibrator;
 
     public GameView(Context context) {
         super(context);
         this.context = context;
+        this.listener = (IEndGameListener) context;
         this.holder = this.getHolder();
         this.holder.addCallback(this);
         this.obstacles = new ArrayList<>();
-        this.thread = new GameThread(holder, context, this);
 
         // SPIRTES AND GAME OBJECTS
         Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.plane);
@@ -72,10 +81,34 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         this.vibrator = (Vibrator)this.context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
+    public void resume() {
+        if (!initThread) {
+            this.thread = new GameThread(holder, this.context, this);
+            sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_GAME);
+            initThread = true;
+        }
+    }
+
+    public void pause() {
+        if (!this.thread.isRunning())
+            return;
+        boolean retry = true;
+        thread.setRunning(false);
+        while (retry) {
+            try {
+                thread.join();
+                retry = false;
+            } catch (InterruptedException e) {
+            }
+        }
+        this.initThread = false;
+        sensorManager.unregisterListener(this);
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        this.resume();
         this.thread.start();
-        sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -87,16 +120,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        boolean retry = true;
-        thread.setRunning(false);
-        while (retry) {
-            try {
-                thread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-            }
-        }
-        sensorManager.unregisterListener(this);
+        this.pause();
     }
 
     @Override
@@ -119,7 +143,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
                         planeSprite.slowDown();
                         speedResetTime = System.currentTimeMillis() + 4000;
                         vibrator.vibrate(500);
+                        lives--;
                         cloud.deactive();
+                        if (score > 0)
+                            score--;
                     }
                 }
             }
@@ -130,6 +157,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         }
         for (GameObject go: objectsToDelete) {
             obstacles.remove(go);
+            if (go instanceof Cloud) {
+                Cloud c = (Cloud)go;
+                if (c.isActive())
+                    score++;
+            }
+        }
+
+        if (this.lives <= 0) {
+            endGame();
         }
 
     }
@@ -148,13 +184,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         }
     }
 
-//    public void pause() {
-//        this.thread.setRunning(false);
-//    }
-//
-//    public void wakeUp() {
-//        this.thread.setRunning(true);
-//    }
+    private void endGame() {
+        Bundle data = new Bundle();
+        data.putInt("score", this.score);
+        this.listener.onGameEnd(data);
+    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
