@@ -9,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -144,6 +145,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
                         speedResetTime = System.currentTimeMillis() + 4000;
                         vibrator.vibrate(500);
                         lives--;
+                        if (lives > 0) {
+                            MediaPlayer player = MediaPlayer.create(this.context, R.raw.cloudcollision);
+                            player.start();
+                        }
                         cloud.deactive();
                         if (score > 0)
                             score--;

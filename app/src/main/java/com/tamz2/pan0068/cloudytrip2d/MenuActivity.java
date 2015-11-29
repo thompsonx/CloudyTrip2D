@@ -1,13 +1,18 @@
 package com.tamz2.pan0068.cloudytrip2d;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.preference.DialogPreference;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +20,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.tamz2.pan0068.cloudytrip2d.views.EndGameDialog;
+import com.tamz2.pan0068.cloudytrip2d.views.PrepareDialog;
 
 import org.w3c.dom.Text;
 
@@ -75,6 +83,7 @@ public class MenuActivity extends Activity implements View.OnClickListener {
             Bundle result = data.getExtras();
             int score = result.getInt("score");
 
+            EndGameDialog dialog = new EndGameDialog();
             SharedPreferences.Editor editor = storage.edit();
             if (score > storage.getInt("score", 0)) {
                 editor.putString("name", name.getText().toString());
@@ -82,18 +91,36 @@ public class MenuActivity extends Activity implements View.OnClickListener {
                 editor.commit();
                 this.sName.setText("Player: " + name.getText().toString());
                 this.score.setText("Score: " + score);
+                MediaPlayer player = MediaPlayer.create(this, R.raw.bestscore);
+                player.start();
             }
+            else {
+                dialog.setGameOver();
+                MediaPlayer player = MediaPlayer.create(this, R.raw.gameover);
+                player.start();
+            }
+
+            dialog.setScore(score);
+            dialog.show(getFragmentManager(), "gameover");
         }
+    }
+
+    public void startGame() {
+        Intent game = new Intent(this, GameActivity.class);
+        SharedPreferences.Editor editor = storage.edit();
+        editor.putString("dname", name.getText().toString());
+        editor.commit();
+        MediaPlayer player = MediaPlayer.create(this, R.raw.ignition);
+        player.start();
+        startActivityForResult(game, 1);
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.buttonStart) {
-            Intent game = new Intent(this, GameActivity.class);
-            SharedPreferences.Editor editor = storage.edit();
-            editor.putString("dname", name.getText().toString());
-            editor.commit();
-            startActivityForResult(game, 1);
+            PrepareDialog dialog = new PrepareDialog();
+            dialog.setMenuActivity(this);
+            dialog.show(getFragmentManager(), "prepare");
         }
     }
 }
