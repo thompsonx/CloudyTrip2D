@@ -45,6 +45,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
 
     private int lives = 3;
     private int score = 0;
+    private long spawnDelay = 0;
     private final int cloudSpawnTime = 2500;
     private final int spawnDecrease = 500;
     private final int decreaseTime = 15000;
@@ -102,6 +103,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
             } catch (InterruptedException e) {
             }
         }
+        this.spawnDelay = thread.getCloudSpawnTime() - System.currentTimeMillis();
         this.initThread = false;
         sensorManager.unregisterListener(this);
     }
@@ -109,6 +111,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         this.resume();
+        if (this.spawnDelay > 0)
+            this.thread.setCloudSpawnTime(System.currentTimeMillis() + this.spawnDelay);
         this.thread.start();
     }
 

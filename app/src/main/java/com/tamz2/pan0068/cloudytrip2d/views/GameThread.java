@@ -17,20 +17,21 @@ public class GameThread extends Thread {
     private Context context;
 
     private long cloudSpawnTime;
-    private boolean cloudSpawned = false;
-
 
     public GameThread(SurfaceHolder holder, Context context, GameView view) {
         this.holder = holder;
         this.running = true;
         this.context = context;
         this.view = view;
+        this.cloudSpawnTime = -1;
     }
 
     public void setRunning(boolean running) {
         this.running = running;
     }
     public boolean isRunning() {return running;}
+    public void setCloudSpawnTime(long time) { this.cloudSpawnTime = time; }
+    public long getCloudSpawnTime() { return this.cloudSpawnTime; }
 
     @Override
     public void run() {
@@ -40,7 +41,8 @@ public class GameThread extends Thread {
         long startime;
         long sleeptime;
 
-        cloudSpawnTime = System.currentTimeMillis();
+        if (cloudSpawnTime == -1)
+            cloudSpawnTime = System.currentTimeMillis();
 
         while (running) {
             startime = System.currentTimeMillis();
@@ -68,9 +70,8 @@ public class GameThread extends Thread {
     }
 
     private void spawnClouds() {
-        if (cloudSpawnTime < System.currentTimeMillis() && !cloudSpawned) {
+        if (cloudSpawnTime < System.currentTimeMillis()) {
             this.view.spawnCloud();
-            cloudSpawned = false;
             cloudSpawnTime = System.currentTimeMillis() + 2500;
         }
     }

@@ -6,17 +6,23 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hold your device in a default position as shown on the picture below"
+        android:text="Hold your device in a default position as shown on the picture below. Your plane is moving forward and backward by a volume button and up and down by phone tilting."
         android:id="@+id/txtPrepare"
         android:layout_gravity="center_horizontal"
-        android:textSize="24dp"
+        android:textSize="20dp"
         android:textAlignment="center"
         android:gravity="center_horizontal"
         android:padding="10dp" />
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:id="@+id/imageView"
         android:src="@drawable/hold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your plane moves forward and backward by volume button and up and down by phone tilting"
+        android:id="@+id/txtControls" />
 </LinearLayout>

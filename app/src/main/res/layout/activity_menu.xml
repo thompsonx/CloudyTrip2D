@@ -22,14 +22,22 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"></LinearLayout>
+            android:layout_width="323dp"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imgIntro"
+                android:src="@drawable/intro" />
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.18">
+            android:paddingLeft="10dp"
+            android:weightSum="1">
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -55,17 +63,11 @@
             <Button
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Start"
+                android:text="PLAY"
                 android:id="@+id/buttonStart"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginRight="98dp"
-                android:layout_marginEnd="98dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp" />
+                android:layout_marginBottom="50dp"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -73,7 +75,9 @@
                 android:text="Best Score"
                 android:id="@+id/txtBestScore"
                 android:textColor="#ffffff"
-                android:layout_marginTop="10dp" />
+                android:layout_marginTop="10dp"
+                android:textSize="20dp"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -90,6 +94,7 @@
                 android:id="@+id/txtScore"
                 android:textColor="#ffffff"
                 android:layout_marginTop="10dp" />
+
         </LinearLayout>
     </LinearLayout>
 
