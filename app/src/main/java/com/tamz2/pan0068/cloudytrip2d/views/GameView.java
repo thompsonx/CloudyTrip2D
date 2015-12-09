@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -42,6 +43,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private Plane planeSprite;
     private Bitmap cloudBitmap;
     private List<GameObject> obstacles;
+    private Bitmap lifeBitmap;
 
     private int lives = 3;
     private int score = 0;
@@ -76,6 +78,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.plane);
         this.planeSprite = new Plane(0, 10, this, bmp);
         this.cloudBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cloud);
+        this.lifeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.life);
 
         // SENSORS AND CONTROLS
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -135,6 +138,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         planeSprite.draw(canvas);
         for (GameObject go: obstacles) {
             go.draw(canvas);
+        }
+
+        // SCORE TEXT
+        Paint scorePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        scorePaint.setColor(Color.WHITE);
+        scorePaint.setStyle(Paint.Style.FILL);
+        scorePaint.setTextSize(35);
+        canvas.drawText(String.format("Score: %d", score),
+                canvas.getWidth()/4,
+                45,
+                scorePaint);
+
+        // LIVES
+        canvas.drawText("Lives: ", canvas.getWidth()/2, 45, scorePaint);
+        int lifeX = canvas.getWidth()/2 + 100;
+        for (int i = 0; i < lives; i++) {
+            canvas.drawBitmap(this.lifeBitmap, lifeX, 15, null);
+            lifeX += 40;
         }
     }
 
