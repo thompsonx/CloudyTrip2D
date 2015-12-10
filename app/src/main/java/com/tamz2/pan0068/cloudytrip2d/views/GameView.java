@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -22,6 +23,7 @@ import com.tamz2.pan0068.cloudytrip2d.IEndGameListener;
 import com.tamz2.pan0068.cloudytrip2d.R;
 import com.tamz2.pan0068.cloudytrip2d.objects.Cloud;
 import com.tamz2.pan0068.cloudytrip2d.objects.GameObject;
+import com.tamz2.pan0068.cloudytrip2d.objects.PauseButton;
 import com.tamz2.pan0068.cloudytrip2d.objects.Plane;
 
 import java.util.ArrayDeque;
@@ -39,11 +41,17 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private Context context;
     private GameThread thread;
     private boolean initThread = false;
+    private boolean firstresume = true;
+    private boolean firstSurface = true;
 
     private Plane planeSprite;
     private Bitmap cloudBitmap;
     private List<GameObject> obstacles;
     private Bitmap lifeBitmap;
+    private Bitmap pauseBitmap;
+    private Bitmap playBitmap;
+    private PauseButton pauseButton;
+    private boolean pausePressed = false;
 
     private int lives = 3;
     private int score = 0;
@@ -79,6 +87,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         this.planeSprite = new Plane(0, 10, this, bmp);
         this.cloudBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cloud);
         this.lifeBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.life);
+        this.playBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.play);
+        this.pauseBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pause);
+        this.pauseButton = new PauseButton(pauseBitmap, playBitmap);
 
         // SENSORS AND CONTROLS
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -87,14 +98,31 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     }
 
     public void resume() {
+        // RESUME ONLY IF GAME HAS JUST BEEN CREATED OR WHEN PAUSE BUTTON IS PRESSED
+        if (!(firstresume || pausePressed))
+            return;
+        if (firstresume) {
+            this.firstresume = false;
+        }
         if (!initThread) {
             this.thread = new GameThread(holder, this.context, this);
             sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_GAME);
             initThread = true;
+            if (this.pausePressed) {
+                pausePressed = false;
+                if (this.spawnDelay > 0)
+                    this.thread.setCloudSpawnTime(System.currentTimeMillis() + this.spawnDelay);
+                this.thread.start();
+            }
         }
     }
 
-    public void pause() {
+    public void pauseGame() {
+        this.pausePressed = false;
+        this.pause();
+    }
+
+    private void pause() {
         if (!this.thread.isRunning())
             return;
         boolean retry = true;
@@ -109,14 +137,34 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         this.spawnDelay = thread.getCloudSpawnTime() - System.currentTimeMillis();
         this.initThread = false;
         sensorManager.unregisterListener(this);
+
+        if (!pausePressed) {
+            this.pauseButton.pause();
+        }
+        reDraw();
+    }
+
+    private void reDraw() {
+        Canvas c = holder.lockCanvas();
+        if (c != null) {
+            this.draw(c);
+            holder.unlockCanvasAndPost(c);
+        }
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         this.resume();
-        if (this.spawnDelay > 0)
-            this.thread.setCloudSpawnTime(System.currentTimeMillis() + this.spawnDelay);
-        this.thread.start();
+
+        // WHEN SURFACE IS CREATED FOR THE FIRST TIME
+        if (firstSurface) {
+            if (this.spawnDelay > 0)
+                this.thread.setCloudSpawnTime(System.currentTimeMillis() + this.spawnDelay);
+            pauseButton.setX(getWidth() - pauseBitmap.getWidth()*2);
+            pauseButton.setY(10);
+            this.thread.start();
+            this.firstSurface = false;
+        }
     }
 
     @Override
@@ -128,7 +176,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        this.pause();
+        this.pauseGame();
     }
 
     @Override
@@ -157,6 +205,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
             canvas.drawBitmap(this.lifeBitmap, lifeX, 15, null);
             lifeX += 40;
         }
+
+        // PAUSE BUTTON
+        this.pauseButton.draw(canvas);
     }
 
     public synchronized void checkLiveObjects() {
@@ -182,7 +233,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
             }
             if (go.getxSpeed() == 0) {
                 objectsToDelete.add(go);
-                Log.d("DELETE CLOUD", "DELETED");
+                //Log.d("DELETE CLOUD", "DELETED");
             }
         }
         for (GameObject go: objectsToDelete) {
@@ -266,5 +317,22 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
             return false;
         }
         return  true;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() != MotionEvent.ACTION_DOWN)
+            return false;
+        if (this.pauseButton.isPressed(event.getX(), event.getY())) {
+            this.pausePressed = true;
+            if (pauseButton.isPause()) {
+                resume();
+            }
+            else {
+                pause();
+            }
+            return true;
+        }
+        return false;
     }
 }

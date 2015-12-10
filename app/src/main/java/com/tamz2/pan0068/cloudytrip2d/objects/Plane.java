@@ -27,7 +27,7 @@ public class Plane extends GameObject {
             xSpeed = 0;
         }
         x = x + xSpeed;
-        Log.d("MOVE", "AREA WIDTH = " + getGameWidth() + " BMP WIDTH = " + getBitmap().getWidth() + " X = " + x + " SPEEDX = " + xSpeed );
+        //Log.d("MOVE", "AREA WIDTH = " + getGameWidth() + " BMP WIDTH = " + getBitmap().getWidth() + " X = " + x + " SPEEDX = " + xSpeed );
 
         if (y > getGameHeight() - getBitmap().getHeight() - ySpeed) {
             ySpeed = 0;

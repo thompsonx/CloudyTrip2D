@@ -55,7 +55,7 @@ public class GameActivity extends Activity implements IEndGameListener{
 
     @Override
     protected void onPause() {
-        this.playground.pause();
+        this.playground.pauseGame();
         super.onPause();
     }
 
