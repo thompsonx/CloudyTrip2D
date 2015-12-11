@@ -22,7 +22,7 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="323dp"
+            android:layout_width="290dp"
             android:layout_height="match_parent">
 
             <ImageView
@@ -60,13 +60,22 @@
                     android:inputType="text" />
             </LinearLayout>
 
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sound"
+                android:id="@+id/switchSound"
+                android:layout_marginTop="5dp"
+                android:textColor="#ffffff"
+                android:checked="true" />
+
             <Button
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="PLAY"
                 android:id="@+id/buttonStart"
-                android:layout_marginBottom="50dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_gravity="center_horizontal" />
 
             <TextView
@@ -94,6 +103,15 @@
                 android:id="@+id/txtScore"
                 android:textColor="#ffffff"
                 android:layout_marginTop="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2015 © Tomáš Panoc | v0.1"
+                android:id="@+id/txtCopyright"
+                android:textColor="#07c2ff"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal" />
 
         </LinearLayout>
     </LinearLayout>

@@ -1,8 +1,6 @@
 package com.tamz2.pan0068.cloudytrip2d.objects;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 
 import com.tamz2.pan0068.cloudytrip2d.views.GameView;
@@ -11,7 +9,7 @@ import com.tamz2.pan0068.cloudytrip2d.views.GameView;
  * Created by Tom on 12. 11. 2015.
  */
 public abstract class GameObject {
-    protected int x;
+    protected float x;
     protected int y;
     protected int xSpeed;
     protected int ySpeed;
@@ -50,7 +48,7 @@ public abstract class GameObject {
         return view.getHeight();
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 

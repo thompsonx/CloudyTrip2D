@@ -1,8 +1,6 @@
 package com.tamz2.pan0068.cloudytrip2d.objects;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.util.Log;
 
 import com.tamz2.pan0068.cloudytrip2d.views.GameView;

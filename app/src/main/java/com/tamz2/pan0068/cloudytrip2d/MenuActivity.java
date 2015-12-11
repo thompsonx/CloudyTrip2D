@@ -18,20 +18,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
+import com.tamz2.pan0068.cloudytrip2d.tools.SoundManager;
 import com.tamz2.pan0068.cloudytrip2d.views.EndGameDialog;
 import com.tamz2.pan0068.cloudytrip2d.views.PrepareDialog;
 
 import org.w3c.dom.Text;
 
-public class MenuActivity extends Activity implements View.OnClickListener {
+public class MenuActivity extends Activity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private SharedPreferences storage;
     private EditText name;
     private TextView sName;
     private TextView score;
+    private Switch soundswitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +51,13 @@ public class MenuActivity extends Activity implements View.OnClickListener {
         this.name = (EditText)findViewById(R.id.editPlayer);
         this.sName = (TextView)findViewById(R.id.txtPlayerName);
         this.score = (TextView)findViewById(R.id.txtScore);
+        this.soundswitch = (Switch)findViewById(R.id.switchSound);
 
         this.name.setText(storage.getString("dname", "plane01"));
         this.sName.setText("Player: " + storage.getString("name", ""));
         this.score.setText("Score: " + storage.getInt("score", 0));
+
+        this.soundswitch.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -91,13 +98,11 @@ public class MenuActivity extends Activity implements View.OnClickListener {
                 editor.commit();
                 this.sName.setText("Player: " + name.getText().toString());
                 this.score.setText("Score: " + score);
-                MediaPlayer player = MediaPlayer.create(this, R.raw.bestscore);
-                player.start();
+                SoundManager.getInstance().playSound(this, R.raw.bestscore);
             }
             else {
                 dialog.setGameOver();
-                MediaPlayer player = MediaPlayer.create(this, R.raw.gameover);
-                player.start();
+                SoundManager.getInstance().playSound(this, R.raw.gameover);
             }
 
             dialog.setScore(score);
@@ -110,8 +115,7 @@ public class MenuActivity extends Activity implements View.OnClickListener {
         SharedPreferences.Editor editor = storage.edit();
         editor.putString("dname", name.getText().toString());
         editor.commit();
-        MediaPlayer player = MediaPlayer.create(this, R.raw.ignition);
-        player.start();
+        SoundManager.getInstance().playSound(this, R.raw.ignition);
         startActivityForResult(game, 1);
     }
 
@@ -121,6 +125,16 @@ public class MenuActivity extends Activity implements View.OnClickListener {
             PrepareDialog dialog = new PrepareDialog();
             dialog.setMenuActivity(this);
             dialog.show(getFragmentManager(), "prepare");
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked) {
+            SoundManager.getInstance().turnOn();
+        }
+        else {
+            SoundManager.getInstance().turnOff();
         }
     }
 }

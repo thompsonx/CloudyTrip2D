@@ -2,6 +2,7 @@ package com.tamz2.pan0068.cloudytrip2d.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 /**
@@ -17,6 +18,7 @@ public class GameThread extends Thread {
     private Context context;
 
     private long cloudSpawnTime;
+    private long cloudSpawnDelay;
 
     public GameThread(SurfaceHolder holder, Context context, GameView view) {
         this.holder = holder;
@@ -24,8 +26,15 @@ public class GameThread extends Thread {
         this.context = context;
         this.view = view;
         this.cloudSpawnTime = -1;
+        this.cloudSpawnDelay = 2500;
     }
 
+    public long getCloudSpawnDelay() {
+        return cloudSpawnDelay;
+    }
+    public void setCloudSpawnDelay(long cloudSpawnDelay) {
+        this.cloudSpawnDelay = cloudSpawnDelay;
+    }
     public void setRunning(boolean running) {
         this.running = running;
     }
@@ -61,9 +70,6 @@ public class GameThread extends Thread {
                 if (sleeptime > 0) {
                     this.sleep(sleeptime);
                 }
-                else {
-                    this.sleep(FPS);
-                }
             }
             catch (Exception e) {}
         }
@@ -72,7 +78,7 @@ public class GameThread extends Thread {
     private void spawnClouds() {
         if (cloudSpawnTime < System.currentTimeMillis()) {
             this.view.spawnCloud();
-            cloudSpawnTime = System.currentTimeMillis() + 2500;
+            cloudSpawnTime = System.currentTimeMillis() + this.cloudSpawnDelay;
         }
     }
 

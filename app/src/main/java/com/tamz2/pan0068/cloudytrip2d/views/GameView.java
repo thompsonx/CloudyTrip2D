@@ -13,7 +13,6 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -21,10 +20,12 @@ import android.view.SurfaceView;
 
 import com.tamz2.pan0068.cloudytrip2d.IEndGameListener;
 import com.tamz2.pan0068.cloudytrip2d.R;
+import com.tamz2.pan0068.cloudytrip2d.gamelogic.GamePhase;
 import com.tamz2.pan0068.cloudytrip2d.objects.Cloud;
 import com.tamz2.pan0068.cloudytrip2d.objects.GameObject;
 import com.tamz2.pan0068.cloudytrip2d.objects.PauseButton;
 import com.tamz2.pan0068.cloudytrip2d.objects.Plane;
+import com.tamz2.pan0068.cloudytrip2d.tools.SoundManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -56,10 +57,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private int lives = 3;
     private int score = 0;
     private long spawnDelay = 0;
-    private final int cloudSpawnTime = 2500;
-    private final int spawnDecrease = 500;
-    private final int decreaseTime = 15000;
-    private final int maxSpeed = Cloud.DEFAULT_SPEED * 3;
+    private ArrayList<GamePhase> phases;
+    private int currentPhase = 0;
 
     private long speedResetTime = Long.MAX_VALUE;
     private boolean speedReseted = false;
@@ -91,6 +90,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         this.pauseBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pause);
         this.pauseButton = new PauseButton(pauseBitmap, playBitmap);
 
+        // GAME PHASES
+        this.phases = new ArrayList<>();
+        this.phases.add(new GamePhase(0, 2500, 1f));
+        this.phases.add(new GamePhase(12, 2500, 1.5f));
+        this.phases.add(new GamePhase(24, 1500, 1.5f));
+        this.phases.add(new GamePhase(36, 1500, 2f));
+        this.phases.add(new GamePhase(48, 1000, 2f));
+        this.phases.add(new GamePhase(60, 1000, 2.5f));
+        this.phases.add(new GamePhase(72, 1000, 3f));
+
         // SENSORS AND CONTROLS
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.acclerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -106,6 +115,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         }
         if (!initThread) {
             this.thread = new GameThread(holder, this.context, this);
+            this.thread.setCloudSpawnDelay(this.phases.get(currentPhase).getCloudSpawnTime());
             sensorManager.registerListener(this, acclerometer, SensorManager.SENSOR_DELAY_GAME);
             initThread = true;
             if (this.pausePressed) {
@@ -222,8 +232,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
                         vibrator.vibrate(500);
                         lives--;
                         if (lives > 0) {
-                            MediaPlayer player = MediaPlayer.create(this.context, R.raw.cloudcollision);
-                            player.start();
+                            SoundManager.getInstance().playSound(this.context, R.raw.cloudcollision);
                         }
                         cloud.deactive();
                         if (score > 0)
@@ -249,12 +258,22 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
             endGame();
         }
 
+        makeGameFaster();
+    }
+
+    private void makeGameFaster() {
+        if (this.currentPhase < (phases.size() - 1))
+            if (this.score == this.phases.get(currentPhase + 1).getScore()) {
+                this.currentPhase++;
+                this.thread.setCloudSpawnDelay(phases.get(currentPhase).getCloudSpawnTime());
+            }
     }
 
     public synchronized void spawnCloud() {
         Random rand = new Random();
         int y = rand.nextInt(getHeight() - cloudBitmap.getHeight());
         Cloud c = new Cloud(y, this, cloudBitmap);
+        c.setxSpeed((int)((float)c.getxSpeed() * phases.get(currentPhase).getSpeedMultiple()));
         obstacles.add(c);
     }
 
